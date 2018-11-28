@@ -22,4 +22,7 @@ module.exports = {
       template: 'template.html',
     }),
   ],
+  performance: {
+    hints: false,
+  },
 };

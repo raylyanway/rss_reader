@@ -20,7 +20,7 @@ check-types:
 	npm run flow
 
 lint:
-	npm run eslint .
+	npx eslint .
 
 publish:
 	npm publish
