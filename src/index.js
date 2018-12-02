@@ -5,7 +5,7 @@ import validator from 'validator';
 import { watch } from 'melanke-watchjs';
 import axios from 'axios';
 import state from './state';
-import isExists from './util';
+import { isExists, isArticleExists } from './util';
 import { renderFeed, renderArticle } from './renderers';
 
 const labelElem = document.getElementById('label');
@@ -55,6 +55,58 @@ $('#exampleModal').on('show.bs.modal', (event) => {
   $('.modal-body p').text($(event.relatedTarget).data('description'));
 });
 
+const getFeed = (url, isReload = true) => {
+  const domParser = new DOMParser();
+  const proxy = 'https://cors-anywhere.herokuapp.com/';
+  axios.get(`${proxy}${url}`)
+    .then((response) => {
+      const data = domParser.parseFromString(response.data, 'application/xml');
+      if (!isReload) {
+        const feed = {
+          title: data.querySelector('channel title').textContent,
+          description: data.querySelector('channel description').textContent,
+          url,
+        };
+        state.feeds.push(feed);
+        state.newFeed = feed;
+      }
+      const articlesList = [];
+      data.querySelectorAll('item').forEach((item) => {
+        const link = item.querySelector('link').textContent;
+        const article = {
+          title: item.querySelector('title').textContent,
+          link,
+          description: item.querySelector('description').textContent,
+        };
+        if (!isReload || !isArticleExists(link, state)) {
+          state.articles.push(article);
+          articlesList.push(article);
+        }
+      });
+      state.newArticleList = articlesList;
+      if (!isReload) {
+        urlElem.value = '';
+        state.addingProcess.submitHidden = true;
+      }
+    })
+    .catch((e) => {
+      state.addingProcess.valid = false;
+      state.addingProcess.submitHidden = true;
+      state.addingProcess.help = e;
+    });
+};
+
+const reloadFeeds = () => {
+  const reloadList = state.feeds.map(feed => getFeed(feed.url));
+  window.setTimeout(() => {
+    Promise.all(reloadList)
+      .then(() => reloadFeeds())
+      .catch(err => console.error(err));
+  }, 5000);
+};
+
+reloadFeeds();
+
 urlElem.addEventListener('keyup', () => {
   if (urlElem.value === '') {
     state.addingProcess.valid = true;
@@ -72,42 +124,11 @@ urlElem.addEventListener('keyup', () => {
 });
 
 addElem.addEventListener('click', () => {
-  if (isExists(urlElem.value, state)) {
+  if (isExists(urlElem.value.toLowerCase().trim(), state)) {
     state.addingProcess.valid = false;
     state.addingProcess.submitHidden = true;
     state.addingProcess.help = 'current address has already been added';
   } else {
-    const domParser = new DOMParser();
-    const proxy = 'https://cors-anywhere.herokuapp.com/';
-    const url = urlElem.value.trim();
-    axios.get(`${proxy}${url}`)
-      .then((response) => {
-        const data = domParser.parseFromString(response.data, 'application/xml');
-        const feed = {
-          title: data.querySelector('channel title').textContent,
-          description: data.querySelector('channel description').textContent,
-          url,
-        };
-        state.feeds.push(feed);
-        state.newFeed = feed;
-        const articlesList = [];
-        data.querySelectorAll('item').forEach((item) => {
-          const article = {
-            title: item.querySelector('title').textContent,
-            link: item.querySelector('link').textContent,
-            description: item.querySelector('description').textContent,
-          };
-          state.articles.push(article);
-          articlesList.push(article);
-        });
-        state.newArticleList = articlesList;
-        urlElem.value = '';
-        state.addingProcess.submitHidden = true;
-      })
-      .catch((e) => {
-        state.addingProcess.valid = false;
-        state.addingProcess.submitHidden = true;
-        state.addingProcess.help = e;
-      });
+    getFeed(urlElem.value.toLowerCase().trim(), false);
   }
 });
