@@ -1,3 +1,4 @@
+import $ from 'jquery';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap';
 import validator from 'validator';
@@ -50,6 +51,10 @@ watch(state.addingProcess, 'valid', () => {
   }
 });
 
+$('#exampleModal').on('show.bs.modal', (event) => {
+  $('.modal-body p').text($(event.relatedTarget).data('description'));
+});
+
 urlElem.addEventListener('keyup', () => {
   if (urlElem.value === '') {
     state.addingProcess.valid = true;
@@ -90,6 +95,7 @@ addElem.addEventListener('click', () => {
           const article = {
             title: item.querySelector('title').textContent,
             link: item.querySelector('link').textContent,
+            description: item.querySelector('description').textContent,
           };
           state.articles.push(article);
           articlesList.push(article);
