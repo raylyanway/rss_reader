@@ -1,11 +1,17 @@
-export default {
-  newFeed: '',
-  newArticleList: [],
+const visualState = {
   addingProcess: {
     valid: true,
-    submitHidden: true,
+    submitDisabled: true,
+    inputDisabled: false,
     help: '',
   },
-  feeds: [],
-  articles: [],
 };
+
+const structuralState = {
+  newFeed: '',
+  newArticleList: [],
+  feeds: new Map(),
+  articles: new Map(),
+};
+
+export { visualState, structuralState };

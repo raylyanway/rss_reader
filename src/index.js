@@ -4,8 +4,8 @@ import 'bootstrap';
 import validator from 'validator';
 import { watch } from 'melanke-watchjs';
 import axios from 'axios';
-import state from './state';
-import { isExists, isArticleExists } from './util';
+import parse from './parser';
+import { visualState, structuralState } from './state';
 import { renderFeed, renderArticle } from './renderers';
 
 const labelElem = document.getElementById('label');
@@ -14,29 +14,37 @@ const addElem = document.getElementById('add');
 const helpElem = document.getElementById('help');
 const feedElem = document.getElementById('feeds');
 const articleElem = document.getElementById('articles');
+const formElem = document.getElementById('form');
 
-watch(state, 'newFeed', () => {
-  feedElem.insertBefore(renderFeed(state.newFeed), feedElem.firstChild);
+watch(structuralState, 'newFeed', () => {
+  feedElem.insertBefore(renderFeed(structuralState.newFeed), feedElem.firstChild);
 });
 
-watch(state, 'newArticleList', () => {
-  state.newArticleList.forEach((article) => {
+watch(structuralState, 'newArticleList', () => {
+  structuralState.newArticleList.forEach((article) => {
     articleElem.insertBefore(renderArticle(article), articleElem.firstChild);
   });
 });
 
-watch(state.addingProcess, 'submitHidden', () => {
-  if (state.addingProcess.submitHidden) {
-    addElem.classList.add('invisible');
+watch(visualState.addingProcess, 'inputDisabled', () => {
+  urlElem.disabled = visualState.addingProcess.inputDisabled;
+});
+
+watch(visualState.addingProcess, 'submitDisabled', () => {
+  addElem.disabled = visualState.addingProcess.submitDisabled;
+});
+
+watch(visualState.addingProcess, 'help', () => {
+  helpElem.textContent = visualState.addingProcess.help;
+  if (visualState.addingProcess.help) {
+    helpElem.classList.remove('invisible');
   } else {
-    addElem.classList.remove('invisible');
+    helpElem.classList.add('invisible');
   }
 });
 
-watch(state.addingProcess, 'valid', () => {
-  helpElem.textContent = state.addingProcess.help;
-
-  if (state.addingProcess.valid) {
+watch(visualState.addingProcess, 'valid', () => {
+  if (visualState.addingProcess.valid) {
     urlElem.classList.remove('is-invalid');
     urlElem.classList.add('is-valid');
     labelElem.classList.remove('text-danger');
@@ -51,84 +59,86 @@ watch(state.addingProcess, 'valid', () => {
   }
 });
 
-$('#exampleModal').on('show.bs.modal', (event) => {
-  $('.modal-body p').text($(event.relatedTarget).data('description'));
-});
-
 const getFeed = (url, isReload = true) => {
-  const domParser = new DOMParser();
   const proxy = 'https://cors-anywhere.herokuapp.com/';
   axios.get(`${proxy}${url}`)
     .then((response) => {
-      const data = domParser.parseFromString(response.data, 'application/xml');
+      const { feed, articles } = parse(response.data, 'application/xml');
       if (!isReload) {
-        const feed = {
-          title: data.querySelector('channel title').textContent,
-          description: data.querySelector('channel description').textContent,
-          url,
-        };
-        state.feeds.push(feed);
-        state.newFeed = feed;
+        structuralState.feeds.set(url, feed);
+        structuralState.newFeed = feed;
       }
       const articlesList = [];
-      data.querySelectorAll('item').forEach((item) => {
-        const link = item.querySelector('link').textContent;
-        const article = {
-          title: item.querySelector('title').textContent,
-          link,
-          description: item.querySelector('description').textContent,
-        };
-        if (!isReload || !isArticleExists(link, state)) {
-          state.articles.push(article);
+      articles.forEach((article) => {
+        const { link } = article;
+        if (!isReload || !structuralState.articles.has(link)) {
+          structuralState.articles.set(link, article);
           articlesList.push(article);
         }
       });
-      state.newArticleList = articlesList;
+      structuralState.newArticleList = articlesList;
       if (!isReload) {
         urlElem.value = '';
-        state.addingProcess.submitHidden = true;
+        visualState.addingProcess.help = '';
       }
+      visualState.addingProcess.inputDisabled = false;
+      console.log(structuralState);
     })
     .catch((e) => {
-      state.addingProcess.valid = false;
-      state.addingProcess.submitHidden = true;
-      state.addingProcess.help = e;
+      if (!isReload) {
+        if (!e.response) {
+          visualState.addingProcess.help = e.message || 'Network Error';
+        } else {
+          visualState.addingProcess.valid = false;
+          visualState.addingProcess.help = 'invalid url';
+        }
+      }
+      visualState.addingProcess.inputDisabled = false;
+      console.error(e);
     });
 };
 
 const reloadFeeds = () => {
-  const reloadList = state.feeds.map(feed => getFeed(feed.url));
+  const reloadList = [...structuralState.feeds.keys()].map(url => getFeed(url));
   window.setTimeout(() => {
     Promise.all(reloadList)
-      .then(() => reloadFeeds())
+      .then(reloadFeeds)
       .catch(err => console.error(err));
   }, 5000);
 };
 
 reloadFeeds();
 
-urlElem.addEventListener('keyup', () => {
+$('#modal').on('show.bs.modal', (event) => {
+  $('.modal-body p').text($(event.relatedTarget).data('description'));
+});
+
+urlElem.addEventListener('input', () => {
   if (urlElem.value === '') {
-    state.addingProcess.valid = true;
-    state.addingProcess.submitHidden = true;
-    state.addingProcess.help = '';
+    visualState.addingProcess.valid = true;
+    visualState.addingProcess.submitDisabled = true;
+    visualState.addingProcess.help = '';
   } else if (!validator.isURL(urlElem.value.toLowerCase().trim())) {
-    state.addingProcess.valid = false;
-    state.addingProcess.submitHidden = true;
-    state.addingProcess.help = 'invalid url';
+    visualState.addingProcess.valid = false;
+    visualState.addingProcess.submitDisabled = true;
+    visualState.addingProcess.help = 'invalid url';
   } else {
-    state.addingProcess.valid = true;
-    state.addingProcess.submitHidden = false;
-    state.addingProcess.help = '';
+    visualState.addingProcess.valid = true;
+    visualState.addingProcess.submitDisabled = false;
+    visualState.addingProcess.help = '';
   }
 });
 
-addElem.addEventListener('click', () => {
-  if (isExists(urlElem.value.toLowerCase().trim(), state)) {
-    state.addingProcess.valid = false;
-    state.addingProcess.submitHidden = true;
-    state.addingProcess.help = 'current address has already been added';
+formElem.addEventListener('submit', (event) => {
+  event.preventDefault();
+  visualState.addingProcess.submitDisabled = true;
+  visualState.addingProcess.inputDisabled = true;
+  visualState.addingProcess.help = 'waiting ...';
+  const url = urlElem.value.toLowerCase().trim();
+  if (structuralState.feeds.has(url)) {
+    visualState.addingProcess.valid = false;
+    visualState.addingProcess.help = 'current address has already been added';
   } else {
-    getFeed(urlElem.value.toLowerCase().trim(), false);
+    getFeed(url, false);
   }
 });

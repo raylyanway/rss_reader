@@ -9,15 +9,15 @@
       <div class="jumbotron">
         <h1>Aliexpress</h1>
         <p class="lead">Neither snow nor rain nor heat nor gloom of night stays these couriers from the swift completion of their appointed rounds.</p>
-        <form>
+        <form class="form" id="form">
           <div class="form-group row">
             <label id="label" for="url" class="col-sm-2 col-form-label text-success">Url for feed</label>
             <div class="col-sm-8">
               <input id="url" type="text" class="form-control is-valid" placeholder="Type address">
             </div>
-            <button id="add" class="col-sm-2 btn btn-outline-success invisible" type="button">Add</button>
+            <button id="add" class="col-sm-2 btn btn-outline-success" type="submit">Add</button>
             <div class="offset-md-2 col-sm-4">
-              <small id="help" class="text-danger invisible"></small>
+              <small id="help" class="invisible"></small>
             </div>
           </div>
         </form>
@@ -29,7 +29,7 @@
         </div>
       </div>
     </main>
-    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-body">
