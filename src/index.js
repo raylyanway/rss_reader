@@ -2,62 +2,43 @@ import $ from 'jquery';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap';
 import validator from 'validator';
-import { watch } from 'melanke-watchjs';
 import axios from 'axios';
 import parse from './parser';
 import { visualState, structuralState } from './state';
-import { renderFeed, renderArticle } from './renderers';
+import initWatchers from './watchers';
 
-const labelElem = document.getElementById('label');
+initWatchers(visualState, structuralState);
+
+const changeVisualState = (mode, message) => {
+  switch (mode) {
+    case 'submit':
+      visualState.addingProcess.submitDisabled = true;
+      visualState.addingProcess.inputDisabled = true;
+      visualState.addingProcess.help = 'waiting ...';
+      break;
+    case 'valid':
+      visualState.addingProcess.valid = true;
+      visualState.addingProcess.submitDisabled = false;
+      visualState.addingProcess.help = '';
+      break;
+    case 'invalid':
+      visualState.addingProcess.valid = false;
+      visualState.addingProcess.submitDisabled = true;
+      visualState.addingProcess.help = message || 'invalid url';
+      visualState.addingProcess.inputDisabled = false;
+      break;
+    case 'start':
+      visualState.addingProcess.valid = true;
+      visualState.addingProcess.submitDisabled = true;
+      visualState.addingProcess.help = '';
+      visualState.addingProcess.inputDisabled = false;
+      break;
+    default:
+  }
+};
+
 const urlElem = document.getElementById('url');
-const addElem = document.getElementById('add');
-const helpElem = document.getElementById('help');
-const feedElem = document.getElementById('feeds');
-const articleElem = document.getElementById('articles');
 const formElem = document.getElementById('form');
-
-watch(structuralState, 'newFeed', () => {
-  feedElem.insertBefore(renderFeed(structuralState.newFeed), feedElem.firstChild);
-});
-
-watch(structuralState, 'newArticleList', () => {
-  structuralState.newArticleList.forEach((article) => {
-    articleElem.insertBefore(renderArticle(article), articleElem.firstChild);
-  });
-});
-
-watch(visualState.addingProcess, 'inputDisabled', () => {
-  urlElem.disabled = visualState.addingProcess.inputDisabled;
-});
-
-watch(visualState.addingProcess, 'submitDisabled', () => {
-  addElem.disabled = visualState.addingProcess.submitDisabled;
-});
-
-watch(visualState.addingProcess, 'help', () => {
-  helpElem.textContent = visualState.addingProcess.help;
-  if (visualState.addingProcess.help) {
-    helpElem.classList.remove('invisible');
-  } else {
-    helpElem.classList.add('invisible');
-  }
-});
-
-watch(visualState.addingProcess, 'valid', () => {
-  if (visualState.addingProcess.valid) {
-    urlElem.classList.remove('is-invalid');
-    urlElem.classList.add('is-valid');
-    labelElem.classList.remove('text-danger');
-    labelElem.classList.add('text-success');
-    helpElem.classList.add('invisible');
-  } else {
-    urlElem.classList.remove('is-valid');
-    urlElem.classList.add('is-invalid');
-    labelElem.classList.remove('text-success');
-    labelElem.classList.add('text-danger');
-    helpElem.classList.remove('invisible');
-  }
-});
 
 const getFeed = (url, isReload = true) => {
   const proxy = 'https://cors-anywhere.herokuapp.com/';
@@ -79,21 +60,18 @@ const getFeed = (url, isReload = true) => {
       structuralState.newArticleList = articlesList;
       if (!isReload) {
         urlElem.value = '';
-        visualState.addingProcess.help = '';
+        changeVisualState('start');
       }
-      visualState.addingProcess.inputDisabled = false;
-      console.log(structuralState);
     })
     .catch((e) => {
       if (!isReload) {
         if (!e.response) {
-          visualState.addingProcess.help = e.message || 'Network Error';
+          const message = e.message || 'Network Error';
+          changeVisualState('invalid', message);
         } else {
-          visualState.addingProcess.valid = false;
-          visualState.addingProcess.help = 'invalid url';
+          changeVisualState('invalid');
         }
       }
-      visualState.addingProcess.inputDisabled = false;
       console.error(e);
     });
 };
@@ -109,35 +87,28 @@ const reloadFeeds = () => {
 
 reloadFeeds();
 
-$('#modal').on('show.bs.modal', (event) => {
+const validateUrl = () => {
+  if (urlElem.value === '') {
+    changeVisualState('start');
+  } else if (!validator.isURL(urlElem.value.toLowerCase().trim())) {
+    changeVisualState('invalid');
+  } else {
+    changeVisualState('valid');
+  }
+};
+
+$('#exampleModal').on('show.bs.modal', (event) => {
   $('.modal-body p').text($(event.relatedTarget).data('description'));
 });
 
-urlElem.addEventListener('input', () => {
-  if (urlElem.value === '') {
-    visualState.addingProcess.valid = true;
-    visualState.addingProcess.submitDisabled = true;
-    visualState.addingProcess.help = '';
-  } else if (!validator.isURL(urlElem.value.toLowerCase().trim())) {
-    visualState.addingProcess.valid = false;
-    visualState.addingProcess.submitDisabled = true;
-    visualState.addingProcess.help = 'invalid url';
-  } else {
-    visualState.addingProcess.valid = true;
-    visualState.addingProcess.submitDisabled = false;
-    visualState.addingProcess.help = '';
-  }
-});
+urlElem.addEventListener('input', validateUrl);
 
 formElem.addEventListener('submit', (event) => {
   event.preventDefault();
-  visualState.addingProcess.submitDisabled = true;
-  visualState.addingProcess.inputDisabled = true;
-  visualState.addingProcess.help = 'waiting ...';
+  changeVisualState('submit');
   const url = urlElem.value.toLowerCase().trim();
   if (structuralState.feeds.has(url)) {
-    visualState.addingProcess.valid = false;
-    visualState.addingProcess.help = 'current address has already been added';
+    changeVisualState('invalid', 'current address has already been added');
   } else {
     getFeed(url, false);
   }

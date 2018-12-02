@@ -15,4 +15,33 @@ const renderArticle = (article) => {
   return li;
 };
 
-export { renderFeed, renderArticle };
+const renderForm = (visualState) => {
+  const labelElem = document.getElementById('label');
+  const urlElem = document.getElementById('url');
+  const addElem = document.getElementById('add');
+  const helpElem = document.getElementById('help');
+
+  urlElem.disabled = visualState.addingProcess.inputDisabled;
+  addElem.disabled = visualState.addingProcess.submitDisabled;
+  helpElem.textContent = visualState.addingProcess.help;
+
+  if (visualState.addingProcess.help) {
+    helpElem.classList.remove('invisible');
+  } else {
+    helpElem.classList.add('invisible');
+  }
+
+  if (visualState.addingProcess.valid) {
+    urlElem.classList.remove('is-invalid');
+    urlElem.classList.add('is-valid');
+    labelElem.classList.remove('text-danger');
+    labelElem.classList.add('text-success');
+  } else {
+    urlElem.classList.remove('is-valid');
+    urlElem.classList.add('is-invalid');
+    labelElem.classList.remove('text-success');
+    labelElem.classList.add('text-danger');
+  }
+};
+
+export { renderFeed, renderArticle, renderForm };
