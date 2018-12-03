@@ -9,7 +9,7 @@ const renderArticle = (article) => {
   const li = document.createElement('li');
   li.className = 'list-group-item';
   li.innerHTML = `<a href="${article.link}">${article.title}</a>
-    <button type="button" data-description="${article.description}" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
+    <button type="button" data-description="${article.description}" class="btn btn-primary" data-toggle="modal" data-target="#modal">
       Description
     </button>`;
   return li;
@@ -24,6 +24,10 @@ const renderForm = (visualState) => {
   urlElem.disabled = visualState.addingProcess.inputDisabled;
   addElem.disabled = visualState.addingProcess.submitDisabled;
   helpElem.textContent = visualState.addingProcess.help;
+
+  if (visualState.addingProcess.inputToClean) {
+    urlElem.value = '';
+  }
 
   if (visualState.addingProcess.help) {
     helpElem.classList.remove('invisible');

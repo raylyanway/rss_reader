@@ -3,6 +3,7 @@ const initVisualState = () => ({
     valid: true,
     submitDisabled: true,
     inputDisabled: false,
+    inputToClean: false,
     help: '',
   },
 });
