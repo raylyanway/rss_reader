@@ -1,4 +1,4 @@
-const visualState = () => ({
+const initVisualState = () => ({
   addingProcess: {
     valid: true,
     submitDisabled: true,
@@ -7,11 +7,11 @@ const visualState = () => ({
   },
 });
 
-const structuralState = () => ({
+const initStructuralState = () => ({
   newFeed: '',
   newArticleList: [],
   feeds: new Map(),
   articles: new Map(),
 });
 
-export { visualState, structuralState };
+export { initVisualState, initStructuralState };
