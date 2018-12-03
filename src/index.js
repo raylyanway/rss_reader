@@ -4,9 +4,11 @@ import 'bootstrap';
 import validator from 'validator';
 import axios from 'axios';
 import parse from './parser';
-import { visualState, structuralState } from './state';
+import { initVisualState, initStructuralState } from './state';
 import initWatchers from './watchers';
 
+const visualState = initVisualState();
+const structuralState = initStructuralState();
 initWatchers(visualState, structuralState);
 
 const changeVisualState = (mode, message) => {
