@@ -20,7 +20,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/raylyanway/project-lvl3-s354.git"
+    "url": "git+https://github.com/raylyanway/rss_reader.git"
   },
   "keywords": [
     "rss"
@@ -28,9 +28,9 @@
   "author": "raylyanway",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/raylyanway/project-lvl3-s354/issues"
+    "url": "https://github.com/raylyanway/rss_reader/issues"
   },
-  "homepage": "https://github.com/raylyanway/project-lvl3-s354#readme",
+  "homepage": "https://github.com/raylyanway/rss_reader#readme",
   "devDependencies": {
     "@babel/cli": "^7.1.5",
     "@babel/core": "^7.1.6",
