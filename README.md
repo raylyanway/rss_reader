@@ -5,4 +5,8 @@
 
 RSS reader with automatic update
 
-[forward, postmen!](http://uneven-flavor.surge.sh/)
+## install
+
+`npm install`
+
+DEMO: [forward, postmen!](http://uneven-flavor.surge.sh/)
