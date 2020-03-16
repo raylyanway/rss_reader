@@ -77,11 +77,11 @@ const getFeed = (visualState, structuralState, url, isReload = true) => {
 
 const reloadFeeds = (visualState, structuralState) => {
   const reloadList = [...structuralState.feeds.keys()]
-    .map(url => getFeed(visualState, structuralState, url));
+    .map((url) => getFeed(visualState, structuralState, url));
   window.setTimeout(() => {
     Promise.all(reloadList)
       .then(() => reloadFeeds(visualState, structuralState))
-      .catch(err => console.error(err));
+      .catch((err) => console.error(err));
   }, 5000);
 };
 
