@@ -1,6 +1,7 @@
+import axios from 'axios';
 import $ from 'jquery';
 import validator from 'validator';
-import axios from 'axios';
+
 import parse from './parser';
 
 /* eslint no-param-reassign:
@@ -41,7 +42,8 @@ const changeVisualState = (visualState, mode, message) => {
 
 const getFeed = (visualState, structuralState, url, isReload = true) => {
   const proxy = 'https://cors-anywhere.herokuapp.com/';
-  axios.get(`${proxy}${url}`)
+  axios
+    .get(`${proxy}${url}`)
     .then((response) => {
       const { feed, articles } = parse(response.data, 'application/xml');
       if (!isReload) {
@@ -76,8 +78,9 @@ const getFeed = (visualState, structuralState, url, isReload = true) => {
 };
 
 const reloadFeeds = (visualState, structuralState) => {
-  const reloadList = [...structuralState.feeds.keys()]
-    .map((url) => getFeed(visualState, structuralState, url));
+  const reloadList = [...structuralState.feeds.keys()].map((url) =>
+    getFeed(visualState, structuralState, url),
+  );
   window.setTimeout(() => {
     Promise.all(reloadList)
       .then(() => reloadFeeds(visualState, structuralState))

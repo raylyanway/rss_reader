@@ -6,7 +6,10 @@ export default (visualState, structuralState) => {
   const articleElem = document.getElementById('articles');
 
   watch(structuralState, 'newFeed', () => {
-    feedElem.insertBefore(renderFeed(structuralState.newFeed), feedElem.firstChild);
+    feedElem.insertBefore(
+      renderFeed(structuralState.newFeed),
+      feedElem.firstChild,
+    );
   });
 
   watch(structuralState, 'newArticleList', () => {
