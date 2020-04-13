@@ -1,5 +1,4 @@
-
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <title>Rss reader</title>
@@ -8,35 +7,65 @@
     <main role="main" class="container">
       <div class="jumbotron">
         <h1>Aliexpress</h1>
-        <p class="lead">Neither snow nor rain nor heat nor gloom of night stays these couriers from the swift completion of their appointed rounds.</p>
+        <p class="lead">
+          Neither snow nor rain nor heat nor gloom of night stays these couriers
+          from the swift completion of their appointed rounds.
+        </p>
         <form class="form" id="form">
           <div class="form-group row">
-            <label id="label" for="url" class="col-sm-2 col-form-label text-success">Url for feed</label>
+            <label
+              id="label"
+              for="url"
+              class="col-sm-2 col-form-label text-success"
+              >Url for feed</label
+            >
             <div class="col-sm-8">
-              <input id="url" type="text" class="form-control is-valid" placeholder="Type address">
+              <input
+                id="url"
+                type="text"
+                class="form-control is-valid"
+                placeholder="Type address"
+              />
             </div>
-            <button id="add" class="col-sm-2 btn btn-outline-success" type="submit">Add</button>
+            <button
+              id="add"
+              class="col-sm-2 btn btn-outline-success"
+              type="submit"
+            >
+              Add
+            </button>
             <div class="offset-md-2 col-sm-4">
               <small id="help" class="invisible"></small>
             </div>
           </div>
         </form>
         <h2>Feeds:</h2>
-        <ul id="feeds" class="list-group">
-        </ul>
+        <ul id="feeds" class="list-group"></ul>
         <h2>Articles:</h2>
-        <div id="articles" class="list-group">
-        </div>
+        <div id="articles" class="list-group"></div>
       </div>
     </main>
-    <div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+    <div
+      class="modal fade"
+      id="modal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="modalLabel"
+      aria-hidden="true"
+    >
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-body">
             <p></p>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-dismiss="modal"
+            >
+              Close
+            </button>
           </div>
         </div>
       </div>
