@@ -1,5 +1,4 @@
 ---
-
 # https://eslint.org/docs/user-guide/configuring#specifying-environments
 env:
   node: true
@@ -10,9 +9,8 @@ env:
 parser: babel-eslint
 
 extends:
-  - 'airbnb-base'
   - 'plugin:jest/recommended'
-  - 'plugin:flowtype/recommended'
+  - 'plugin:prettier/recommended'
 
 rules:
   no-console: 0
@@ -22,4 +20,3 @@ plugins:
   - jest
   # https://github.com/babel/eslint-plugin-babel
   - babel
-  - flowtype
