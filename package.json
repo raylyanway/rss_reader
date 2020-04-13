@@ -48,7 +48,7 @@
     "eslint-plugin-import": "^2.20.1",
     "eslint-plugin-jest": "^23.8.2",
     "eslint-plugin-prettier": "^3.1.3",
-    "html-webpack-plugin": "^3.2.0",
+    "html-webpack-plugin": "^4.2.0",
     "jest": "^25.1.0",
     "jest-cli": "^25.1.0",
     "prettier": "^2.0.4",
@@ -63,6 +63,6 @@
     "jquery": "^3.4.1",
     "melanke-watchjs": "^1.5.2",
     "popper.js": "^1.16.1",
-    "validator": "^12.2.0"
+    "validator": "^13.0.0"
   }
 }
