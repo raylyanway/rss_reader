@@ -15,8 +15,17 @@ const renderArticle = (article) => {
   return li;
 };
 
-const renderForm = (visualState) => {
+const toggleClasses = (params) => {
   const labelElem = document.getElementById('label');
+  const urlElem = document.getElementById('url');
+
+  urlElem.classList.remove(params[0]);
+  urlElem.classList.add(params[1]);
+  labelElem.classList.remove(params[2]);
+  labelElem.classList.add(params[3]);
+};
+
+const renderForm = (visualState) => {
   const urlElem = document.getElementById('url');
   const addElem = document.getElementById('add');
   const helpElem = document.getElementById('help');
@@ -35,17 +44,11 @@ const renderForm = (visualState) => {
     helpElem.classList.add('invisible');
   }
 
-  if (visualState.addingProcess.valid) {
-    urlElem.classList.remove('is-invalid');
-    urlElem.classList.add('is-valid');
-    labelElem.classList.remove('text-danger');
-    labelElem.classList.add('text-success');
-  } else {
-    urlElem.classList.remove('is-valid');
-    urlElem.classList.add('is-invalid');
-    labelElem.classList.remove('text-success');
-    labelElem.classList.add('text-danger');
-  }
+  const params = visualState.addingProcess.valid
+    ? ['is-invalid', 'is-valid', 'text-danger', 'text-success']
+    : ['is-valid', 'is-invalid', 'text-success', 'text-danger'];
+
+  toggleClasses(params);
 };
 
 export { renderFeed, renderArticle, renderForm };

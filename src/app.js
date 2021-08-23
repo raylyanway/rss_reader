@@ -9,34 +9,51 @@ import parse from './parser';
   ["visualState", "structuralState", "urlElem"] }]
 */
 
+const getVisualStateParams = (mode, message) => {
+  const modeList = {
+    submit: ['waiting ...', true, true, undefined, undefined],
+    valid: ['', false, undefined, true, false],
+    invalid: [message || 'invalid url', true, false, false, false],
+    start: ['', true, false, true, true],
+  };
+
+  return modeList[mode];
+};
+
 const changeVisualState = (visualState, mode, message) => {
-  switch (mode) {
-    case 'submit':
-      visualState.addingProcess.submitDisabled = true;
-      visualState.addingProcess.inputDisabled = true;
-      visualState.addingProcess.help = 'waiting ...';
-      break;
-    case 'valid':
-      visualState.addingProcess.valid = true;
-      visualState.addingProcess.submitDisabled = false;
-      visualState.addingProcess.help = '';
-      visualState.addingProcess.inputToClean = false;
-      break;
-    case 'invalid':
-      visualState.addingProcess.valid = false;
-      visualState.addingProcess.submitDisabled = true;
-      visualState.addingProcess.help = message || 'invalid url';
-      visualState.addingProcess.inputDisabled = false;
-      visualState.addingProcess.inputToClean = false;
-      break;
-    case 'start':
-      visualState.addingProcess.valid = true;
-      visualState.addingProcess.submitDisabled = true;
-      visualState.addingProcess.help = '';
-      visualState.addingProcess.inputDisabled = false;
-      visualState.addingProcess.inputToClean = true;
-      break;
-    default:
+  const [help, submitDisabled, inputDisabled, valid, inputToClean] =
+    getVisualStateParams(mode, message);
+
+  visualState.addingProcess.help = help;
+  visualState.addingProcess.submitDisabled = submitDisabled;
+  visualState.addingProcess.inputDisabled = inputDisabled;
+  visualState.addingProcess.valid = valid;
+  visualState.addingProcess.inputToClean = inputToClean;
+};
+
+const handleGetFeed = (
+  response,
+  visualState,
+  structuralState,
+  url,
+  isReload,
+) => {
+  const { feed, articles } = parse(response.data, 'application/xml');
+  if (!isReload) {
+    structuralState.feeds.set(url, feed);
+    structuralState.newFeed = feed;
+  }
+  const articlesList = [];
+  articles.forEach((article) => {
+    const { link } = article;
+    if (!isReload || !structuralState.articles.has(link)) {
+      structuralState.articles.set(link, article);
+      articlesList.push(article);
+    }
+  });
+  structuralState.newArticleList = articlesList;
+  if (!isReload) {
+    changeVisualState(visualState, 'start');
   }
 };
 
@@ -44,26 +61,9 @@ const getFeed = (visualState, structuralState, url, isReload = true) => {
   const proxy = 'https://cors-anywhere.herokuapp.com/';
   axios
     .get(`${proxy}${url}`)
-    .then((response) => {
-      const { feed, articles } = parse(response.data, 'application/xml');
-      if (!isReload) {
-        structuralState.feeds.set(url, feed);
-        structuralState.newFeed = feed;
-      }
-      const articlesList = [];
-      articles.forEach((article) => {
-        const { link } = article;
-        if (!isReload || !structuralState.articles.has(link)) {
-          structuralState.articles.set(link, article);
-          articlesList.push(article);
-        }
-      });
-      structuralState.newArticleList = articlesList;
-      if (!isReload) {
-        changeVisualState(visualState, 'start');
-      }
-      console.log(structuralState);
-    })
+    .then((response) =>
+      handleGetFeed(response, visualState, structuralState, url, isReload),
+    )
     .catch((e) => {
       if (!isReload) {
         if (!e.response) {
