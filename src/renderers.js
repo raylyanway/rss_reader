@@ -8,8 +8,8 @@ const renderFeed = (feed) => {
 const renderArticle = (article) => {
   const li = document.createElement('li');
   li.className = 'list-group-item';
-  li.innerHTML = `<a href="${article.link}">${article.title}</a>
-    <button type="button" data-description="${article.description}" class="btn btn-primary" data-toggle="modal" data-target="#modal">
+  li.innerHTML = `<div class="mb-2"><a href="${article.link}">${article.title}</a></div>
+    <button type="button" data-description="${article.description}" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal">
       Description
     </button>`;
   return li;
