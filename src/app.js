@@ -101,8 +101,9 @@ const validateUrl = (visualState, urlElem) => {
 const app = (visualState, structuralState) => {
   const urlElem = document.getElementById('url');
   const formElem = document.getElementById('form');
+  const myModal = document.getElementById('modal');
 
-  $('#modal').on('show.bs.modal', (event) => {
+  myModal.addEventListener('show.bs.modal', (event) => {
     $('.modal-body p').text($(event.relatedTarget).data('description'));
   });
 
