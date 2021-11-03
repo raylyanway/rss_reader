@@ -63,6 +63,6 @@
     "jquery": "^3.5.1",
     "melanke-watchjs": "^1.5.2",
     "popper.js": "^1.16.1",
-    "validator": "^13.5.2"
+    "validator": "^13.7.0"
   }
 }
